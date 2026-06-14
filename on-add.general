@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Consolidated Taskwarrior on-add hook."""
+
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))
+from lib.common import (
+    add_cve_tag,
+    add_signs,
+    block_tasks_add,
+    fix_due_dates,
+    gmail_link,
+    issue_link_add,
+    jira_link_add,
+    pr_link_add,
+    mr_link_add,
+    project_prefix_add,
+    run_pipeline,
+    transform_url_description,
+)
+
+FEATURES = {
+    "add_cve_tag":        True,
+    "block_tasks":        True,
+    "gmail_link":         True,
+    "issue_link":         True,
+    "jira_link":          True,
+    "pr_link":            True,
+    "mr_link":            True,
+    "project_prefix":     True,
+    "signs_from_tags":    True,
+    "fix_due_dates":      True,
+    "transform_url":      True,
+}
+
+FEATURE_PIPELINE = [
+    ("transform_url",   transform_url_description),
+    ("fix_due_dates",   fix_due_dates),
+    ("block_tasks",     block_tasks_add),
+    ("add_cve_tag",     add_cve_tag),
+    ("project_prefix",  project_prefix_add),
+    ("jira_link",       jira_link_add),
+    ("issue_link",      issue_link_add),
+    ("pr_link",         pr_link_add),
+    ("mr_link",         mr_link_add),
+    ("gmail_link",      gmail_link),
+    ("signs_from_tags", add_signs),
+]
+
+task = json.loads(sys.stdin.readline())
+messages = run_pipeline(FEATURE_PIPELINE, FEATURES, task)
+for msg in messages:
+    print(msg)
+print(json.dumps(task))
