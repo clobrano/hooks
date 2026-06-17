@@ -846,11 +846,19 @@ def get_webpage_metadata(url):
 
     return None
 
+def get_duration_tag(minutes):
+    """Return the corresponding tag to the given duration in minutes"""
+    if minutes > 30:
+        return "long"
+    if minutes > 10:
+        return "mid"
+    return "short"
 
 def transform_url_description(task):
     """Transform task description if it's a URL into a human-readable format."""
     messages = []
     description = task.get("description", "")
+    tags = task.get("tags", [])
 
     if not is_url_only(description):
         return messages
@@ -882,6 +890,7 @@ def transform_url_description(task):
             title, minutes = metadata
             if minutes:
                 new_description = f"[{minutes}m] {title}"
+                tags.append(get_duration_tag(minutes))
             else:
                 new_description = title
             new_annotation = f"LINK: {url}"
@@ -895,6 +904,7 @@ def transform_url_description(task):
             new_description = f"[{reading_minutes}m] {title}"
             new_annotation = f"LINK: {url}"
             messages.append(f"Transformed webpage URL to: {new_description}")
+            tags.append(get_duration_tag(reading_minutes))
 
     # Apply transformations
     if new_description:
@@ -902,11 +912,12 @@ def transform_url_description(task):
 
         if new_annotation:
             annotations = task.get("annotations", [])
-            idx, existing = find_annotation(annotations, "LINK: ")
+            _, existing = find_annotation(annotations, "LINK: ")
             if not existing:
                 messages.append(add_annotation(annotations, new_annotation))
                 task["annotations"] = annotations
 
+        task["tags"] = tags
     return messages
 
 
