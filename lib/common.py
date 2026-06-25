@@ -20,8 +20,8 @@ GITHUB_BASE_URL = "https://github.com/"
 GITLAB_BASE_URL = "https://gitlab.cee.redhat.com/"
 
 JIRA_ID_REGEX = r"\[([A-Z]+-\d+)\]"
-PR_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) PR(\d+)\]"
-MR_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) MR(\d+)\]"
+PR_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) PR (\d+)\]"
+MR_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) MR (\d+)\]"
 TICKET_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) I(\d+)\]"
 
 TAG_SIGN_MAP = {
