@@ -34,6 +34,7 @@ TAG_SIGN_MAP = {
     "meeting": "#MEETING",
     "merged": "#MERGED",
     "notbug": "#NOT-BUG",
+    "quarter-goal": "#Q-GOAL",
     "review": "#IN-REVIEW",
     "wait": "#WAIT-FEEDBACK",
     "wfa": "#WAIT-AUTHOR",
@@ -720,11 +721,8 @@ def get_github_pr_metadata(url):
         }
         response = requests.get(url, timeout=5, headers=headers)
         response.raise_for_status()
-        # Scrape title from HTML - extract text before "by" (author line)
-        title_match = re.search(r'<title>([^|]+?)\s+by\s+', response.text)
-        if not title_match:
-            # Fallback: just get first part of title before "·" or "|"
-            title_match = re.search(r'<title>([^·|]+)', response.text)
+        # Scrape title from HTML - extract text before " by " or " · "
+        title_match = re.search(r'<title>([^·|]+?)(?:\s+by\s+|·)', response.text)
         if title_match:
             title = title_match.group(1).strip()
             return org, repo, pr_num, title
