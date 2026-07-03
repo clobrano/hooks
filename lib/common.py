@@ -889,6 +889,7 @@ def transform_url_description(task):
             if minutes:
                 new_description = f"[{minutes}m] {title}"
                 tags.append(get_duration_tag(minutes))
+                tags.append("video")
             else:
                 new_description = title
             new_annotation = f"LINK: {url}"
@@ -903,6 +904,7 @@ def transform_url_description(task):
             new_annotation = f"LINK: {url}"
             messages.append(f"Transformed webpage URL to: {new_description}")
             tags.append(get_duration_tag(reading_minutes))
+            tags.append("read")
 
     # Apply transformations
     if new_description:
