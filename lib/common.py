@@ -18,6 +18,7 @@ import requests
 JIRA_BASE_URL = "https://issues.redhat.com/browse/"
 GITHUB_BASE_URL = "https://github.com/"
 GITLAB_BASE_URL = "https://gitlab.cee.redhat.com/"
+GMAIL_ACCOUNT_INDEX = 0
 
 JIRA_ID_REGEX = r"\[([A-Z]+-\d+)\]"
 PR_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) PR (\d+)\]"
@@ -135,6 +136,14 @@ def build_gitlab_pr_url(description):
     return None
 
 
+def build_gmail_search_url(query):
+    """Build a Gmail search URL from *query*."""
+    sanitized = re.sub(r'[()[\]:]', '', query)
+    sanitized = sanitized.replace(' ', '+')
+    sanitized = re.sub(r'\++', '+', sanitized)
+    return f"https://mail.google.com/mail/u/{GMAIL_ACCOUNT_INDEX}/#search/{sanitized}"
+
+
 # ---------------------------------------------------------------------------
 # Shared feature functions (used by both on-add and on-modify)
 # ---------------------------------------------------------------------------
@@ -149,35 +158,21 @@ def gmail_link(task):
     if "email" not in tags:
         return messages
 
-    # strip project prefix from description
     project = task.get("project", "")
     prefix = _project_prefix(project)
-    if prefix and description.startswith(prefix):
-        description = description.lstrip(prefix)
+    if prefix:
+        tag = f"{prefix}: "
+        if description.startswith(tag):
+            description = description[len(tag):]
 
-    try:
-        subprocess.run(["gmail-search-link.sh", description], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error running gmail-search-link.sh: {e}", file=sys.stderr)
-    except FileNotFoundError:
-        print("gmail-search-link.sh not found in PATH", file=sys.stderr)
+    url = build_gmail_search_url(description)
+    gmail_annotation = f"GMAIL: {url}"
+    _, existing = find_annotation(annotations, "GMAIL: ")
 
-    try:
-        result = subprocess.run(["wl-paste"], capture_output=True, text=True, check=True)
-        url = result.stdout.strip()
-
-        if url:
-            gmail_annotation = f"GMAIL: {url}"
-            _, existing = find_annotation(annotations, "GMAIL: ")
-
-            if existing == gmail_annotation:
-                messages.append(f"Gmail annotation already exists: {gmail_annotation}")
-            elif existing is None:
-                messages.append(add_annotation(annotations, gmail_annotation))
-    except subprocess.CalledProcessError as e:
-        print(f"Error running wl-paste: {e}", file=sys.stderr)
-    except FileNotFoundError:
-        print("wl-paste not found in PATH", file=sys.stderr)
+    if existing == gmail_annotation:
+        messages.append(f"Gmail annotation already exists: {gmail_annotation}")
+    elif existing is None:
+        messages.append(add_annotation(annotations, gmail_annotation))
 
     task["annotations"] = annotations
     return messages
