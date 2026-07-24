@@ -179,13 +179,30 @@ def gmail_link(task):
 
 
 def fix_due_dates(task):
-    """Set a default time on due dates that fall on local midnight."""
+    """Set a default time on due dates that fall on local midnight.
+
+    If the task has the +allday tag, the due time is forced to local midnight
+    instead (on-add it stays at midnight; on-modify it is reset to midnight).
+    """
     messages = []
     due = task.get("due")
     if not due:
         return messages
 
+    tags = task.get("tags", [])
     timestamp = datetime.strptime(due, '%Y%m%dT%H%M%SZ').replace(tzinfo=pytz.UTC)
+
+    is_allday = task.get("allDay") or "allday" in tags
+    if is_allday:
+        if not is_local_midnight(timestamp):
+            local_zone = datetime.now().astimezone().tzinfo
+            timestamp = timestamp.astimezone(local_zone).replace(
+                hour=0, minute=0, second=0,
+            ).astimezone(pytz.UTC)
+            task["due"] = timestamp.strftime('%Y%m%dT%H%M%SZ')
+            messages.append("Due time reset to midnight (allday).")
+        return messages
+
     if is_local_midnight(timestamp):
         timestamp = set_default_time(timestamp)
         task["due"] = timestamp.strftime('%Y%m%dT%H%M%SZ')
