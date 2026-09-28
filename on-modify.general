@@ -33,7 +33,7 @@ FEATURES = {
     "jira_link":          True,
     "pr_link":            True,
     "mr_link":            True,
-    "project_prefix":     True,
+    "project_prefix":     False,
     "signs_from_tags":    True,
     "fix_due_dates":      True,
     "cleanup_on_done":    True,
