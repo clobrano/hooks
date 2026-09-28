@@ -26,10 +26,14 @@ MR_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) MR (\d+)\]"
 TICKET_ID_REGEX = r"\[([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+) I(\d+)\]"
 
 TAG_SIGN_MAP = {
+    "bug": "#BUG",
     "closed": "#CLOSED",
     "codereview": "#CODEREVIEW",
     "duplicate": "#DUPLICATE",
     "epic": "#EPIC",
+    "prd": "#PRD",
+    "design": "#DESIGN",
+    "feature": "#FEATURE",
     "handedoff": "#HANDED-OFF",
     "hold": "#HOLD",
     "meeting": "#MEETING",
