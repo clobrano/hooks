@@ -466,13 +466,13 @@ def issue_link_modify(before, after):
 
 
 def gitlab_mr_link_modify(before, after):
-    """Conservative PR annotation management: add only, never remove. Syncs UDA."""
+    """Conservative MR annotation management: add only, never remove. Syncs UDA."""
     messages = []
     description = after.get("description", "")
     annotations = after.get("annotations", [])
 
     url = build_gitlab_pr_url(description)
-    idx, existing = find_annotation(annotations, "PR: ")
+    idx, existing = find_annotation(annotations, "MR: ")
 
     if url:
         new_annotation = f"MR: {url}"
@@ -482,7 +482,7 @@ def gitlab_mr_link_modify(before, after):
         else:
             messages.append(f"MR annotation for {existing} already exists. Not modifying or removing.")
     elif existing:
-        messages.append(f"Existing MR annotation {existing} found, but no new PR ID in description. Not modifying or removing.")
+        messages.append(f"Existing MR annotation {existing} found, but no new MR ID in description. Not modifying or removing.")
 
     # Sync UDA from whichever MR URL is active
     active_url = (f"MR: {url}" if url else None) or existing
@@ -887,7 +887,7 @@ def transform_url_description(task):
         metadata = get_github_pr_metadata(url)
         if metadata:
             org, repo, pr_num, title = metadata
-            new_description = f"{title} [{org}/{repo} PR{pr_num}]"
+            new_description = f"{title} [{org}/{repo} PR {pr_num}]"
             messages.append(f"Transformed GitHub PR URL to: {new_description}")
 
     # Try GitLab MR
@@ -895,7 +895,7 @@ def transform_url_description(task):
         metadata = get_gitlab_mr_metadata(url)
         if metadata:
             org, repo, mr_num, title = metadata
-            new_description = f"{title} [{org}/{repo} MR{mr_num}]"
+            new_description = f"{title} [{org}/{repo} MR {mr_num}]"
             messages.append(f"Transformed GitLab MR URL to: {new_description}")
 
     # Try YouTube
